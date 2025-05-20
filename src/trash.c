@@ -52,12 +52,12 @@ int main() {
     while (true) {
         input_option(&option);
         switch (option) {
-            case 'L':
+            case 'l':
             {
                 list_trash_files();
                 break;
             }
-            case 'P':
+            case 'p':
             {
                 char old_path_name[MAX_PATH_LEN] = {0};
                 char path_name[MAX_FILENAME_LEN] = {0};
@@ -67,7 +67,7 @@ int main() {
                 println();
                 break;
             }
-            case 'R':
+            case 'r':
             {
                 if (check_trash_log() == -1) {
                     break;
@@ -79,7 +79,7 @@ int main() {
                 println();
                 break;
             }
-            case 'D':
+            case 'd':
             {
                 if (check_trash_log() == -1) {
                     break;
@@ -90,7 +90,7 @@ int main() {
                 delete_file_permanently(path_name);
                 break;
             }
-            case 'C':
+            case 'c':
             {
                 if(check_trash_log() == -1) break;
                 clear_trash_log();
@@ -99,12 +99,12 @@ int main() {
                 println();
                 break;
             }
-            case 'M':
+            case 'm':
             {
                 print_menu();
                 break;
             }
-            case 'Q':
+            case 'q':
             {
                 exit(0);
                 break;
@@ -125,7 +125,7 @@ void input_option(char* option) {
     char tmp; 
     while (true) {
         scanf("%c", &tmp);
-        if (tmp == 'L' || tmp == 'P' || tmp == 'R' || tmp == 'D' || tmp == 'C' || tmp == 'M' || tmp == 'Q') {
+        if (tmp == 'l' || tmp == 'p' || tmp == 'r' || tmp == 'd' || tmp == 'c' || tmp == 'm' || tmp == 'q') {
             break;
         }
     }
@@ -134,18 +134,46 @@ void input_option(char* option) {
 }
 
 void println() {
-    printf("------------------------------------------------\n");
+    printf("\033[1;90m");  // Bright gray
+    printf("----------------------------------------------------------------------\n");
+    printf("\033[0m");
 }
 
 void print_menu() {
-    printf("Menu:\n");
-    printf("L - List trash files\n");
-    printf("P - Put file into trash\n");
-    printf("R - Restore file from trash\n");
-    printf("D - Delete file from trash permanently\n");
-    printf("C - Clear trashbin\n");
-    printf("M - Print menu\n");
-    printf("Q - Exit\n");
+    #define COLOR_TITLE "\033[1;35m"     // Bright magenta (bold)
+    #define COLOR_OPTION "\033[1;36m"    // Bright cyan (bold)
+    #define COLOR_KEY "\033[1;33m"       // Bright yellow (bold)
+    #define COLOR_RESET "\033[0m"        // Reset to default
+
+    printf(COLOR_TITLE "\t\t...---=== Trash Manager ===---...\n" COLOR_RESET);
+    printf(COLOR_OPTION "[");
+    printf(COLOR_KEY "l");
+    printf(COLOR_OPTION "] - List of trash files\t");
+    
+    printf(COLOR_OPTION "[");
+    printf(COLOR_KEY "p");
+    printf(COLOR_OPTION "] - Put the file in the trash\n");
+    
+    printf(COLOR_OPTION "[");
+    printf(COLOR_KEY "r");
+    printf(COLOR_OPTION "] - Restore file from trash\t");
+    
+    printf(COLOR_OPTION "[");
+    printf(COLOR_KEY "d");
+    printf(COLOR_OPTION "] - Delete file from trash permanently\n");
+    
+    printf(COLOR_OPTION "[");
+    printf(COLOR_KEY "c");
+    printf(COLOR_OPTION "] - Clear trash\t\t");
+    
+    printf(COLOR_OPTION "[");
+    printf(COLOR_KEY "m");
+    printf(COLOR_OPTION "] - Print menu\n");
+    
+    printf(COLOR_OPTION "[");
+    printf(COLOR_KEY "q");
+    printf(COLOR_OPTION "] - Quit\n" COLOR_RESET);
+    
     println();
 }
 

@@ -14,6 +14,17 @@
 #include <fcntl.h>
 #include <sys/mman.h>
 
+// Цветовые коды ANSI
+#define COLOR_RESET   "\033[0m"
+#define COLOR_RED     "\033[1;31m"
+#define COLOR_GREEN   "\033[1;32m"
+#define COLOR_YELLOW  "\033[1;33m"
+#define COLOR_BLUE    "\033[1;34m"
+#define COLOR_MAGENTA "\033[1;35m"
+#define COLOR_CYAN    "\033[1;36m"
+#define COLOR_GRAY    "\033[1;90m"
+#define COLOR_WHITE   "\033[1;97m"
+
 void init();
 void input_option(char* option);
 void println();
@@ -73,7 +84,7 @@ int main() {
                     break;
                 }
                 char new_path[MAX_PATH_LEN] = {0};
-                printf("input name of file you want to restore:\n");
+                printf(COLOR_CYAN "Input name of file you want to restore: " COLOR_RESET);
                 input_file_path(new_path);
                 restore_file(new_path);
                 println();
@@ -85,7 +96,7 @@ int main() {
                     break;
                 }
                 char path_name[MAX_PATH_LEN];
-                printf("input name of file you want to delete permanently:\n");
+                printf(COLOR_CYAN "Input name of file you want to delete permanently: " COLOR_RESET);
                 input_file_path(path_name);
                 delete_file_permanently(path_name);
                 break;
@@ -95,7 +106,7 @@ int main() {
                 if(check_trash_log() == -1) break;
                 clear_trash_log();
                 clear_trashbin();
-                printf("trashbin was succesfully cleared\n");
+                printf(COLOR_GREEN "Trashbin was successfully cleared\n" COLOR_RESET);
                 println();
                 break;
             }
@@ -122,57 +133,57 @@ void init() {
 }
 
 void input_option(char* option) {
-    char tmp; 
+    char tmp;
+    printf(COLOR_CYAN "Select option: [l/p/r/d/c/m/q]: " COLOR_RESET);
+    fflush(stdout);
+    
     while (true) {
         scanf("%c", &tmp);
-        if (tmp == 'l' || tmp == 'p' || tmp == 'r' || tmp == 'd' || tmp == 'c' || tmp == 'm' || tmp == 'q') {
+        if (tmp == '\n') continue;
+        if (tmp == 'l' || tmp == 'p' || tmp == 'r' || tmp == 'd' || 
+            tmp == 'c' || tmp == 'm' || tmp == 'q') {
             break;
         }
+        printf(COLOR_RED "Invalid option! Please choose [l/p/r/d/c/m/q]: " COLOR_RESET);
+        while(getchar() != '\n');
     }
     *option = tmp;
     println();
 }
 
 void println() {
-    printf("\033[1;90m");  // Bright gray
-    printf("----------------------------------------------------------------------\n");
-    printf("\033[0m");
+    printf(COLOR_GRAY "----------------------------------------------------------------------\n" COLOR_RESET);
 }
 
 void print_menu() {
-    #define COLOR_TITLE "\033[1;35m"     // Bright magenta (bold)
-    #define COLOR_OPTION "\033[1;36m"    // Bright cyan (bold)
-    #define COLOR_KEY "\033[1;33m"       // Bright yellow (bold)
-    #define COLOR_RESET "\033[0m"        // Reset to default
-
-    printf(COLOR_TITLE "\t\t...---=== Trash Manager ===---...\n" COLOR_RESET);
-    printf(COLOR_OPTION "[");
-    printf(COLOR_KEY "l");
-    printf(COLOR_OPTION "] - List of trash files\t");
+    printf(COLOR_MAGENTA "\t\t...---=== Trash Manager ===---...\n" COLOR_RESET);
+    printf(COLOR_CYAN "[");
+    printf(COLOR_YELLOW "l");
+    printf(COLOR_CYAN "] - List of trash files\t");
     
-    printf(COLOR_OPTION "[");
-    printf(COLOR_KEY "p");
-    printf(COLOR_OPTION "] - Put the file in the trash\n");
+    printf(COLOR_CYAN "[");
+    printf(COLOR_YELLOW "p");
+    printf(COLOR_CYAN "] - Put the file in the trash\n");
     
-    printf(COLOR_OPTION "[");
-    printf(COLOR_KEY "r");
-    printf(COLOR_OPTION "] - Restore file from trash\t");
+    printf(COLOR_CYAN "[");
+    printf(COLOR_YELLOW "r");
+    printf(COLOR_CYAN "] - Restore file from trash\t");
     
-    printf(COLOR_OPTION "[");
-    printf(COLOR_KEY "d");
-    printf(COLOR_OPTION "] - Delete file from trash permanently\n");
+    printf(COLOR_CYAN "[");
+    printf(COLOR_YELLOW "d");
+    printf(COLOR_CYAN "] - Delete file from trash permanently\n");
     
-    printf(COLOR_OPTION "[");
-    printf(COLOR_KEY "c");
-    printf(COLOR_OPTION "] - Clear trash\t\t");
+    printf(COLOR_CYAN "[");
+    printf(COLOR_YELLOW "c");
+    printf(COLOR_CYAN "] - Clear trash\t\t");
     
-    printf(COLOR_OPTION "[");
-    printf(COLOR_KEY "m");
-    printf(COLOR_OPTION "] - Print menu\n");
+    printf(COLOR_CYAN "[");
+    printf(COLOR_YELLOW "m");
+    printf(COLOR_CYAN "] - Print menu\n");
     
-    printf(COLOR_OPTION "[");
-    printf(COLOR_KEY "q");
-    printf(COLOR_OPTION "] - Quit\n" COLOR_RESET);
+    printf(COLOR_CYAN "[");
+    printf(COLOR_YELLOW "q");
+    printf(COLOR_CYAN "] - Quit\n" COLOR_RESET);
     
     println();
 }
@@ -181,7 +192,7 @@ void compute_paths() {
     strcpy(home_path, getenv("HOME"));
 
     if (!(*home_path)) {
-        fprintf(stderr, "ERROR: can't get home_path environment\n");
+        fprintf(stderr, COLOR_RED "ERROR: can't get home_path environment\n" COLOR_RESET);
         exit(1);
     }
 
@@ -194,7 +205,7 @@ void compute_paths() {
 int check_trash_log() {
     int fd = open(trash_log_path, O_RDWR);
     if (!fd) {
-        perror("open");
+        perror(COLOR_RED "open" COLOR_RESET);
         exit(errno);
     }
 
@@ -203,7 +214,7 @@ int check_trash_log() {
     close(fd);
 
     if (!s.st_size) {
-        fprintf(stderr, "trash is empty, put files to it first\n");
+        fprintf(stderr, COLOR_YELLOW "Trash is empty, put files to it first\n" COLOR_RESET);
         println();
         return -1;
     }
@@ -216,7 +227,7 @@ void list_trash_files() {
     struct dirent* read_dir;
 
     if (!dir && errno) {
-        perror("opendir");
+        perror(COLOR_RED "opendir" COLOR_RESET);
         errno = 0;
         return;
     }
@@ -228,16 +239,15 @@ void list_trash_files() {
         }
         
         if (!files_count) {
-            printf("trash files:\n");
+            printf(COLOR_CYAN "Trash files:\n" COLOR_RESET);
         }
 
-        char tmp[MAX_PATH_LEN];
-        printf("%s\n", read_dir->d_name);
+        printf(COLOR_WHITE "%s\n" COLOR_RESET, read_dir->d_name);
         files_count++;
     }
 
     if (!files_count) {
-        fprintf(stderr, "trash is empty\n");
+        fprintf(stderr, COLOR_YELLOW "Trash is empty\n" COLOR_RESET);
     }
 
     println();
@@ -245,7 +255,7 @@ void list_trash_files() {
 }
 
 void input_full_or_relative_file_path(char* old_path_name, char* path_name, char* new_path) {
-    printf("input name of file you want to put into trashbin:\n");
+    printf(COLOR_CYAN "Input name of file you want to put into trashbin: " COLOR_RESET);
     fflush(stdin);
     fgets(path_name, MAX_FILENAME_LEN, stdin);
     fgets(path_name, MAX_FILENAME_LEN, stdin);
@@ -290,7 +300,7 @@ void put_file_to_trash_with_checks(char* old_path_name, char* new_path) {
 
     if (!file) {
         if (rename(old_path_name, new_path)) {
-            fprintf(stderr, "file with this name doesn't exist\n");
+            fprintf(stderr, COLOR_RED "File with this name doesn't exist\n" COLOR_RESET);
             return;
         }   
     }
@@ -303,7 +313,7 @@ void put_file_to_trash_with_checks(char* old_path_name, char* new_path) {
         } while (fopen(tmp_path, "r"));
 
         if (rename(old_path_name, tmp_path)) {
-            fprintf(stderr, "file with this name doesn't exist\n");
+            fprintf(stderr, COLOR_RED "File with this name doesn't exist\n" COLOR_RESET);
             return;
         }
 
@@ -329,7 +339,7 @@ void restore_file(const char* filename) {
     FILE* file = fopen(trash_log_path, "r+");
 
     if (!file) {
-        perror("fopen");
+        perror(COLOR_RED "fopen" COLOR_RESET);
         exit(errno);
     }
 
@@ -375,12 +385,12 @@ void restore_file(const char* filename) {
 
         if (!end) {
             if(rename(filename, dest)) {
-                perror("rename");
+                perror(COLOR_RED "rename" COLOR_RESET);
                 println();
                 break;
             } 
 
-            printf("%s was restored from trashbin and renamed to %s\n", 
+            printf(COLOR_GREEN "%s" COLOR_RESET " was restored from trashbin and renamed to " COLOR_YELLOW "%s\n" COLOR_RESET, 
             filename, dest);
         }
         else {
@@ -392,12 +402,12 @@ void restore_file(const char* filename) {
             } while (fopen(tmp_path, "r"));
 
             if (rename(filename, tmp_path)) {
-                perror("rename");
+                perror(COLOR_RED "rename" COLOR_RESET);
                 println();
                 break;
             }
 
-            printf("%s was restored from trashbin and renamed to %s because of collisions\n", filename, tmp_path);
+            printf(COLOR_GREEN "%s was restored from trashbin and renamed to %s because of collisions\n" COLOR_RESET, filename, tmp_path);
             fclose(end);
         }
         
@@ -406,14 +416,14 @@ void restore_file(const char* filename) {
     }
 
     fclose(file);
-    printf("there is no such file in trashbin\n");
+    printf(COLOR_YELLOW "There is no such file in trashbin\n" COLOR_RESET);
 }
 
 void delete_file_permanently(const char* filename) {
     FILE* file = fopen(trash_log_path, "r+");
 
     if (!file) {
-        perror("fopen");
+        perror(COLOR_RED "fopen" COLOR_RESET);
         exit(errno);
     }
 
@@ -443,11 +453,11 @@ void delete_file_permanently(const char* filename) {
         }
 
         if (remove(filename)) {
-            perror("remove");
+            perror(COLOR_RED "remove" COLOR_RESET);
             exit(errno);  
         }
 
-        printf("%s was deleted permanently from trashbin\n",filename);
+        printf(COLOR_GREEN "%s was deleted permanently from trashbin\n" COLOR_RESET, filename);
         println();
         delete_line_from_trashlog_file(dest);
         fclose(file);
@@ -455,7 +465,7 @@ void delete_file_permanently(const char* filename) {
     }
 
     fclose(file);
-    printf("there is no such file in trashbin\n");
+    printf(COLOR_YELLOW "There is no such file in trashbin\n" COLOR_RESET);
     println();
 }
 
@@ -567,13 +577,16 @@ void logger(const char* path_name, const char* new_path) {
     FILE *log = fopen(trash_log_path, "a");  
     
     if (!log) {
-        perror("fopen");
+        perror(COLOR_RED "fopen" COLOR_RESET);
         exit(errno);
     }
 
     fseek(log, 0, SEEK_END);         
     fprintf(log, "%s was renamed to %s by user on %s", path_name, new_path, 
     asctime(timeinfo));
-	printf("%s was renamed to %s by user\n", path_name, new_path);
+    
+    printf(COLOR_GREEN "%s" COLOR_RESET " was renamed to " COLOR_YELLOW "%s" COLOR_RESET " by user\n", 
+           path_name, new_path);
+    
     fclose(log);
 }
